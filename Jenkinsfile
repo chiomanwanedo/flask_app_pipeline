@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                deleteDir()  // Clean workspace
+                deleteDir()
                 git branch: 'main',
                     url: 'https://github.com/chiomanwanedo/flask_rest_api.git'
                 sh "ls -lart"
@@ -20,8 +20,8 @@ pipeline {
             steps {
                 sh '''
                 echo "================= Installing Dependencies =================="
-                
-                # Update and Install Required Packages
+
+                # Install Python3, pip, and venv if missing
                 sudo apt update -y
                 sudo apt install -y python3 python3-pip python3-venv
 
@@ -30,8 +30,8 @@ pipeline {
                     python3 -m venv venv
                 fi
 
-                # Activate Virtual Environment
-                source venv/bin/activate
+                # Activate Virtual Environment (Use '.' instead of source)
+                . venv/bin/activate
 
                 # Upgrade pip inside Virtual Environment
                 pip install --upgrade pip
@@ -52,7 +52,6 @@ pipeline {
 
                 SERVICE_FILE="/etc/systemd/system/flask_app.service"
 
-                # Create Flask Systemd Service File
                 sudo bash -c "cat > $SERVICE_FILE <<EOF
                 [Unit]
                 Description=Flask Application
@@ -69,10 +68,7 @@ pipeline {
                 WantedBy=multi-user.target
                 EOF"
 
-                # Reload Systemd
                 sudo systemctl daemon-reload
-
-                # Enable the Service to Start on Boot
                 sudo systemctl enable flask_app.service
                 '''
             }
@@ -82,11 +78,7 @@ pipeline {
             steps {
                 sh '''
                 echo "================= Starting Flask Application =================="
-
-                # Restart Flask Service
                 sudo systemctl restart flask_app.service
-
-                # Check Flask Service Status
                 sudo systemctl status flask_app.service --no-pager
                 '''
             }
