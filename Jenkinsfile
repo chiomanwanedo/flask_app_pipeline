@@ -19,13 +19,14 @@ pipeline {
             steps {
                 sh '''
                 echo "================= Installing Dependencies =================="
-                sudo apt update -y
+                echo "jenkins-password" | sudo -S apt update -y
                 sudo apt install -y python3 python3-pip
                 pip3 install --upgrade pip
-                pip3 install -r requirements.txt
+                pip3 install -r requirement.txt
                 '''
-            }
-        }
+    }
+}
+
 
         stage('Configure Flask as Systemd Service') {
             steps {
