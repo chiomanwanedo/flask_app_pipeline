@@ -27,11 +27,36 @@ pipeline {
             }
         }
 
-        stage('Run Flask App') {
+        stage('Configure Flask as Systemd Service') {
             steps {
                 sh '''
-                echo "================= Starting Flask Application =================="
-                nohup python3 app.py > flask.log 2>&1 &
+                echo "================= Configuring Systemd Service =================="
+                sudo tee /etc/systemd/system/flask.service <<EOF
+                [Unit]
+                Description=Flask Application
+                After=network.target
+
+                [Service]
+                User=ubuntu
+                WorkingDirectory=/var/lib/jenkins/workspace/FlaskApp
+                ExecStart=/usr/bin/python3 app.py
+                Restart=always
+
+                [Install]
+                WantedBy=multi-user.target
+                EOF
+                sudo systemctl daemon-reload
+                sudo systemctl enable flask
+                '''
+            }
+        }
+
+        stage('Start Flask as Systemd Service') {
+            steps {
+                sh '''
+                echo "================= Restarting Flask Service =================="
+                sudo systemctl restart flask
+                sudo systemctl status flask --no-pager
                 '''
             }
         }
