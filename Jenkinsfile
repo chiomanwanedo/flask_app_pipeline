@@ -30,17 +30,9 @@ pipeline {
                     python3 -m venv venv
                 fi
 
-                # Activate Virtual Environment (Use '.' instead of source)
-                . venv/bin/activate
-
-                # Upgrade pip inside Virtual Environment
-                pip install --upgrade pip
-
-                # Install Flask and other dependencies from requirements file
-                pip install -r requirement.txt
-
-                # Deactivate Virtual Environment
-                deactivate
+                # Install Flask and other dependencies
+                ${VENV_DIR}/bin/pip install --upgrade pip
+                ${VENV_DIR}/bin/pip install -r requirement.txt
                 '''
             }
         }
@@ -61,7 +53,7 @@ pipeline {
                 User=jenkins
                 WorkingDirectory=${APP_DIR}
                 Environment=VIRTUAL_ENV=${VENV_DIR}
-                ExecStart=${VENV_DIR}/bin/python ${APP_DIR}/app.py
+                ExecStart=${VENV_DIR}/bin/python3 ${APP_DIR}/app.py
                 Restart=always
 
                 [Install]
